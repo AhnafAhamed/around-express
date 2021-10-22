@@ -1,23 +1,67 @@
-const path = require('path');
+const Users = require('../models/users');
 
-const usersDataPath = path.join(__dirname, '..', 'data', 'users.json');
+const getUsers = (req, res) => {
+  Users.find({})
+    .then((users) => {
+      res.status(200).send(users);
+    })
+    .catch(() => {
+      res.status(500).send({ message: 'Server Error' });
+    });
+};
 
-const { getDataFromFile } = require('../helpers/files');
+const getUserById = (req, res) => {
+  Users.findById(req.params.cardId)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'User Not Found' });
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Bad Request Error' });
+      }
+      return res.status(500).send({ message: 'Server Error' });
+    });
+};
 
-const getUsers = (req, res) => getDataFromFile(usersDataPath)
-  .then((users) => {
-    res.status(200).send(users);
-  })
-  .catch((err) => res.status(500).send(err));
+const createUser = (req, res) => {
+  const { name, about, avatar } = req.body;
+  Users.create({ name, about, avatar })
+    .then((user) => res.status(200).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Bad Request Error' });
+      }
+      return res.status(500).send({ message: 'Internal Server Error' });
+    });
+};
 
-const getUserById = (req, res) => getDataFromFile(usersDataPath)
-  .then((users) => users.find((user) => user._id === req.params.id))
-  .then((user) => {
-    if (!user) {
-      return res.status(404).send({ message: 'User ID not found' });
-    }
-    return res.status(200).send(user);
-  })
-  .catch((err) => res.status(500).send(err));
+const updateUser = (req, res) => {
+  const { name, about } = req.body;
+  Users.findByIdAndUpdate(req.user._id, { name, about })
+    .then((user) => res.status(200).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Bad Request Error' });
+      }
+      return res.status(500).send({ message: 'Internal Server Error' });
+    });
+};
 
-module.exports = { getUsers, getUserById };
+const updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+  Users.findByIdAndUpdate(req.user._id, { avatar })
+    .then((user) => res.status(200).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Bad Request Error' });
+      }
+      return res.status(500).send({ message: 'Internal Server Error' });
+    });
+};
+
+module.exports = {
+  getUsers, getUserById, createUser, updateUser, updateAvatar,
+};
