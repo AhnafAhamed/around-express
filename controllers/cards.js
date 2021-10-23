@@ -62,7 +62,7 @@ const addLike = (req, res) => {
     { new: true })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Bad Request Error' });
       }
       return res.status(500).send({ message: 'Internal Server Error' });
@@ -75,7 +75,7 @@ const removeLike = (req, res) => {
     { new: true })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Bad Request Error' });
       }
       return res.status(500).send({ message: 'Internal Server Error' });
